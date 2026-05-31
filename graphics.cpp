@@ -10,17 +10,13 @@ GraphicsLib::~GraphicsLib(){
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 }
-void GraphicsLib::printscreen(){
-    SDL_UpdateTexture(texture,NULL,disp.data(),CHIP_8_X * sizeof(uint32_t));
+void GraphicsLib::printscreen(uint8_t* disp){
+    for (std::size_t i = 0; i < sdl_disp.size();i++){
+        sdl_disp[i] = (disp[i] == 0 ? 0x000000FF : 0xFFFFFFFF);
+    }
+    SDL_UpdateTexture(texture,NULL,sdl_disp.data(),CHIP_8_X * sizeof(uint32_t));
     SDL_Rect rect{0,0,CHIP_8_X * SCALE, CHIP_8_Y * SCALE};
     SDL_RenderCopy(renderer,texture,NULL,&rect);
     SDL_RenderPresent(renderer);
     SDL_RenderClear(renderer);
-}
-void GraphicsLib::clearscreen(){
-    disp.fill(0);
-    printscreen();
-}
-uint8_t GraphicsLib::displaysprite(uint8_t index, uint8_t x, uint8_t y, uint8_t n){
-    
 }

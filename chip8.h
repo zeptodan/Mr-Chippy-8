@@ -2,13 +2,14 @@
 #include<array>
 #include<stack>
 #include<string>
-#include"graphics.h"
-#define RAM_SIZE 4096
-#define TOT_REGS 16
-#define ROM_START 512
+#include"constants.h"
+enum RENDER_STATE {
+    RENDER_STATE_RENDER,
+    RENDER_STATE_NOT_RENDER
+};
 class Chip8 {
     private:
-    GraphicsLib graphicslib;
+    std::array<uint8_t,CHIP_8_X * CHIP_8_Y> disp{};
     std::array<uint8_t,RAM_SIZE> ram{};
     std::array<uint8_t,TOT_REGS> regs{};
     std::stack<uint16_t> stack;
@@ -19,5 +20,6 @@ class Chip8 {
     public:
     void load_rom(std::string file_path);
     uint16_t fetch();
-    void decode_execute();
+    RENDER_STATE decode_execute();
+    uint8_t* ret_display();
 };

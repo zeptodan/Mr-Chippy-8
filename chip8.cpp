@@ -10,7 +10,7 @@ uint16_t Chip8::fetch(){
     pc +=2;
     return op;
 }
-void Chip8::decode_execute(){
+RENDER_STATE Chip8::decode_execute(){
     uint16_t op = fetch();
     uint16_t X = op | 0x0F00;
     uint16_t Y = op | 0x00F0;
@@ -23,7 +23,8 @@ void Chip8::decode_execute(){
             switch (op | 0x000F)
             {
             case 0x0000:
-               graphicslib.clearscreen();
+                disp.fill(0);
+                return RENDER_STATE_RENDER;
                 break;
             default:
                 break;
@@ -42,10 +43,25 @@ void Chip8::decode_execute(){
             index = NNN;
             break;
         case 0xD000:
-            regs[0xF] = graphicslib.displaysprite(index,X,Y,N);
+            regs[0xF] = 0;
+            for (int row = 0;row < N;row++){
+                uint8_t pixels = ram[index + row];
+                for(int bit = 0;bit < 8;bit++){
+                    int pos = X + CHIP_8_X * (Y + row) + bit;
+                    uint8_t pixel = (pixels >> (7 - bit)) & 1;
+                    if (disp[pos] && pixel){
+                        regs[0xF] = 1;
+                    }
+                    disp[pos] ^= pixel;
+                }
+            }
+            return RENDER_STATE_RENDER;
             break;
         default:
             break;
     }
 
+}
+uint8_t* Chip8::ret_display(){
+    return disp.data();
 }
