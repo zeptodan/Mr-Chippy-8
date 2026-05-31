@@ -5,9 +5,9 @@ void Chip8::load_rom(std::string file_path){
     file.read(reinterpret_cast<char*>(ram.data() + ROM_START),ram.size() - ROM_START);
     return;
 }
-Chip8::Chip8() : regs{}, ram{}, index{}, pc{}, d_time{},s_time{} {}
 uint16_t Chip8::fetch(){
     uint16_t op =  (ram[pc] >> 8) | ram[pc + 1];
+    pc +=2;
     return op;
 }
 void Chip8::decode_execute(){
@@ -20,16 +20,29 @@ void Chip8::decode_execute(){
     switch (op | 0xF000)
     {
         case 0x0000:
+            switch (op | 0x000F)
+            {
+            case 0x0000:
+               graphicslib.clearscreen();
+                break;
+            default:
+                break;
+            }
             break;
         case 0x1000:
+            pc = NNN;
             break;
         case 0x6000:
+            regs[X] = NN;
             break;
         case 0x7000:
+            regs[X] += NN;
             break;
         case 0xA000:
+            index = NNN;
             break;
         case 0xD000:
+            regs[0xF] = graphicslib.displaysprite(index,X,Y,N);
             break;
         default:
             break;
