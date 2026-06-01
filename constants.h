@@ -4,3 +4,4 @@
 #define RAM_SIZE 4096
 #define TOT_REGS 16
 #define ROM_START 512
+#define TOT_KEYS 16

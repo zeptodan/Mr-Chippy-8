@@ -160,10 +160,37 @@ RENDER_STATE Chip8::decode_execute(){
             return RENDER_STATE_RENDER;
             break;
         case 0xE000:
+            switch (op & 0x00FF)
+            {
+            case 0x009E:
+                if (keys[regs[X]]){
+                    pc+=2;
+                }
+                break;
+            case 0x00A1:
+                if (!keys[regs[X]]){
+                    pc+=2;
+                }
+                break;
+            default:
+                std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
+                exit(1);
+                break;
+            }
         break;
         case 0xF000:
             switch (op & 0x00FF)
             {
+                case 0x000A:
+                    for (int i = 0;i < TOT_KEYS;i++){
+                        if (keys[i]){
+                            regs[X] = i;
+                        }
+                        else if (i == TOT_KEYS - 1){
+                            pc -= 2;
+                        }
+                    }
+                    break;
                 case 0x001E:
                     if (!(index & 0xF000) && ((index + regs[X]) & 0xF000)){
                         regs[0xF] = 1;
@@ -205,4 +232,7 @@ RENDER_STATE Chip8::decode_execute(){
 }
 uint8_t* Chip8::ret_display(){
     return disp.data();
+}
+decltype(Chip8::keys)& Chip8::ret_keys(){
+    return keys;
 }

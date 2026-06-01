@@ -7,9 +7,11 @@ enum RENDER_STATE {
     RENDER_STATE_RENDER,
     RENDER_STATE_NOT_RENDER
 };
+using Keys = std::array<bool,TOT_KEYS>;
 class Chip8 {
     private:
     std::array<uint8_t,CHIP_8_X * CHIP_8_Y> disp{};
+    Keys keys{};
     std::array<uint8_t,RAM_SIZE> ram{};
     std::array<uint8_t,TOT_REGS> regs{};
     std::stack<uint16_t> stack;
@@ -22,4 +24,6 @@ class Chip8 {
     uint16_t fetch();
     RENDER_STATE decode_execute();
     uint8_t* ret_display();
+    void check_input();
+    Keys& ret_keys();
 };
