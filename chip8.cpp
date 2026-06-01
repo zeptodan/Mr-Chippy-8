@@ -159,6 +159,43 @@ RENDER_STATE Chip8::decode_execute(){
             }
             return RENDER_STATE_RENDER;
             break;
+        case 0xE000:
+        break;
+        case 0xF000:
+            switch (op & 0x00FF)
+            {
+                case 0x001E:
+                    if (!(index & 0xF000) && ((index + regs[X]) & 0xF000)){
+                        regs[0xF] = 1;
+                    }
+                    else {
+                        regs[0xF] = 0;
+                    }
+                    index += regs[X];
+                    break;
+                case 0x0033:
+                {
+                    uint8_t VX = regs[X];
+                    ram[index + 2] = VX % 10;
+                    VX /= 10;
+                    ram[index + 1] = VX % 10;
+                    VX /= 10;
+                    ram[index] = VX % 10;
+                }
+                    break;
+                case 0x0055:
+                    for (int i = 0; i < X; i++){
+                        ram[index + i] = regs[i]; 
+                    }
+                    break;
+                case 0x0065:
+                    for (int i = 0; i < X; i++){
+                        regs[i] = ram[index + i]; 
+                    }
+                    break;
+                default:
+                    break;
+            }
         default:
             std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
             exit(1);
