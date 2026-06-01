@@ -24,18 +24,18 @@ RENDER_STATE Chip8::decode_execute(){
         case 0x0000:
             switch (op & 0x000F)
             {
-            case 0x0000:
-                disp.fill(0);
-                return RENDER_STATE_RENDER;
-                break;
-            case 0x000E:
-                pc = stack.top();
-                stack.pop();
-                break;
-            default:
-                std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
-                exit(1);
-                break;
+                case 0x0000:
+                    disp.fill(0);
+                    return RENDER_STATE_RENDER;
+                    break;
+                case 0x000E:
+                    pc = stack.top();
+                    stack.pop();
+                    break;
+                default:
+                    std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
+                    exit(1);
+                    break;
             }
             break;
         case 0x1000:
@@ -66,6 +66,63 @@ RENDER_STATE Chip8::decode_execute(){
         case 0x7000:
             regs[X] += NN;
             break;
+        case 0x8000:
+            switch (op & 0x000F)
+            {
+                case 0x0000:
+                    regs[X] = regs[Y];
+                    break;
+                case 0x0001:
+                    regs[X] |= regs[Y];
+                    break;
+                case 0x0002:
+                    regs[X] &= regs[Y];
+                    break;
+                case 0x0003:
+                    regs[X] ^= regs[Y];
+                    break;
+                case 0x0004:
+                    regs[X] += regs[Y];
+                    if (regs[X] + regs[Y] > 255){
+                        regs[0xF] = 1;
+                    }
+                    else{
+                        regs[0xF] = 0;
+                    }
+                    break;
+                case 0x0005:
+                    regs[X] -= regs[Y];
+                    if (regs[X] - regs[Y] <0){
+                        regs[0xF] = 0;
+                    }
+                    else {
+                        regs[0xF] = 1;
+                    }
+                    break;
+                case 0x0006:
+                    regs[X] = regs[Y];
+                    regs[0xF] = regs[X] & 0x01;
+                    regs[X] >>= 1;
+                    break;
+                case 0x0007:
+                    regs[X] = regs[Y] - regs[X];
+                    if (regs[Y] - regs[X] <0){
+                        regs[0xF] = 0;
+                    }
+                    else {
+                        regs[0xF] = 1;
+                    }
+                    break;
+                case 0x000E:
+                    regs[X] = regs[Y];
+                    regs[0xF] = (regs[X] >> 7) & 0x01;
+                    regs[X] <<= 1;
+                    break;
+                default:
+                    std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
+                    exit(1);
+                    break;
+            }
         case 0x9000:
             if (regs[X] != regs[Y]){
                 pc += 2;
@@ -73,6 +130,12 @@ RENDER_STATE Chip8::decode_execute(){
             break;
         case 0xA000:
             index = NNN;
+            break;
+        case 0xB000:
+            pc = NNN + regs[0x0];
+            break;
+        case 0xC000:
+            regs[X] = (rand() % NN) & NN;
             break;
         case 0xD000:
             regs[0xF] = 0;
