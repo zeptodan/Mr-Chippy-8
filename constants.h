@@ -5,3 +5,6 @@
 #define TOT_REGS 16
 #define ROM_START 512
 #define TOT_KEYS 16
+#define INSTRUCTION_RATE 700
+#define FPS 60
+#define TOT_FONTS 16

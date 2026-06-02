@@ -34,6 +34,9 @@ void process_event(Keys& keys, SDL_Event& ev){
         break;
     }
 }
+void play_sound(bool ring){
+
+}
 int main(int argc, char* argv[]){
     if (argc != 2){
         std::cout << "give rom path\n";
@@ -43,13 +46,22 @@ int main(int argc, char* argv[]){
     GraphicsLib graphicslib;
     chip.load_rom(argv[1]);
     SDL_Event ev;
+    bool ring = false;
+    uint64_t start, end, ms_per_frame = 1000 / FPS;
     while(true){
+        start = SDL_GetTicks64();
         if (SDL_PollEvent(&ev) != 0){
             process_event(chip.ret_keys(),ev);
         }
-        RENDER_STATE state = chip.decode_execute();
-        if(state == RENDER_STATE_RENDER){
-            graphicslib.printscreen(chip.ret_display());
+        for (int i = 0; i < INSTRUCTION_RATE; i++){
+            chip.decode_execute();
         }
+        graphicslib.printscreen(chip.ret_display());
+        end = SDL_GetTicks64();
+        if (end - start < ms_per_frame){
+            SDL_Delay(ms_per_frame - (end - start));
+        }
+        ring = chip.update_timers();
+        play_sound(ring);
     }
 }

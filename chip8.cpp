@@ -1,6 +1,9 @@
 #include<fstream>
 #include<iostream>
 #include"chip8.h"
+Chip8::Chip8 () {
+    std::copy(ram.begin(),ram.begin() + fonts.size(),fonts.begin());
+}
 void Chip8::load_rom(std::string file_path){
     std::ifstream file(file_path, std::ios::binary);
     file.read(reinterpret_cast<char*>(ram.data() + ROM_START),ram.size() - ROM_START);
@@ -14,8 +17,8 @@ uint16_t Chip8::fetch(){
 }
 RENDER_STATE Chip8::decode_execute(){
     uint16_t op = fetch();
-    uint16_t X = op & 0x0F00;
-    uint16_t Y = op & 0x00F0;
+    uint16_t X = (op & 0x0F00) >> 8;
+    uint16_t Y = (op & 0x00F0) >> 4;
     uint16_t N = op & 0x000F;
     uint16_t NN = op & 0x00FF;
     uint16_t NNN = op & 0x0FFF;
@@ -123,6 +126,7 @@ RENDER_STATE Chip8::decode_execute(){
                     exit(1);
                     break;
             }
+            break;
         case 0x9000:
             if (regs[X] != regs[Y]){
                 pc += 2;
@@ -177,10 +181,13 @@ RENDER_STATE Chip8::decode_execute(){
                 exit(1);
                 break;
             }
-        break;
+            break;
         case 0xF000:
             switch (op & 0x00FF)
             {
+                case 0x0007:
+                    regs[X] = d_time;
+                    break;
                 case 0x000A:
                     for (int i = 0;i < TOT_KEYS;i++){
                         if (keys[i]){
@@ -191,6 +198,12 @@ RENDER_STATE Chip8::decode_execute(){
                         }
                     }
                     break;
+                case 0x0015:
+                    d_time = regs[X];
+                    break;
+                case 0x0018:
+                    s_time = regs[X];
+                    break;
                 case 0x001E:
                     if (!(index & 0xF000) && ((index + regs[X]) & 0xF000)){
                         regs[0xF] = 1;
@@ -199,6 +212,9 @@ RENDER_STATE Chip8::decode_execute(){
                         regs[0xF] = 0;
                     }
                     index += regs[X];
+                    break;
+                case 0x0029:
+                    index = ram[regs[X] * 5];
                     break;
                 case 0x0033:
                 {
@@ -221,8 +237,11 @@ RENDER_STATE Chip8::decode_execute(){
                     }
                     break;
                 default:
+                    std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
+                    exit(1);
                     break;
             }
+            break;
         default:
             std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
             exit(1);
@@ -233,6 +252,13 @@ RENDER_STATE Chip8::decode_execute(){
 uint8_t* Chip8::ret_display(){
     return disp.data();
 }
-decltype(Chip8::keys)& Chip8::ret_keys(){
+Keys& Chip8::ret_keys(){
     return keys;
+}
+bool Chip8::update_timers(){
+    if (d_time != 0)
+        d_time--;
+    if (s_time != 0)
+        s_time--;
+    return s_time == 0 ? false : true;
 }
