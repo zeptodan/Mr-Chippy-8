@@ -11,25 +11,26 @@ void process_event(Keys& keys, SDL_Event& ev){
     case SDL_KEYUP:
         switch (ev.key.keysym.scancode)
         {
-        case SDLK_1:keys[0x0] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_2:keys[0x1] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_3:keys[0x2] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_4:keys[0x3] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_q:keys[0x4] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_w:keys[0x5] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_e:keys[0x6] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_r:keys[0x7] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_a:keys[0x8] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_s:keys[0x9] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_d:keys[0xA] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_f:keys[0xB] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_z:keys[0xC] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_x:keys[0xD] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_c:keys[0xE] = ev.type == SDL_KEYDOWN ? true: false;break;
-        case SDLK_v:keys[0xF] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_1:keys[0x0] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_2:keys[0x1] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_3:keys[0x2] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_4:keys[0x3] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_Q:keys[0x4] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_W:keys[0x5] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_E:keys[0x6] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_R:keys[0x7] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_A:keys[0x8] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_S:keys[0x9] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_D:keys[0xA] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_F:keys[0xB] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_Z:keys[0xC] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_X:keys[0xD] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_C:keys[0xE] = ev.type == SDL_KEYDOWN ? true: false;break;
+        case SDL_SCANCODE_V:keys[0xF] = ev.type == SDL_KEYDOWN ? true: false;break;
         default:
             break;
         }
+        break;
     default:
         break;
     }
@@ -68,12 +69,13 @@ int main(int argc, char* argv[]){
     SDL_AudioDeviceID device = SDL_OpenAudioDevice(nullptr,0,&spec,nullptr,0);
     SDL_PauseAudioDevice(device,0);
     std::array<int16_t,SAMPLES> buffer;
+    int instructions_per_frame = INSTRUCTION_RATE / FPS;
     while(true){
         start = SDL_GetTicks64();
         if (SDL_PollEvent(&ev) != 0){
             process_event(chip.ret_keys(),ev);
         }
-        for (int i = 0; i < INSTRUCTION_RATE; i++){
+        for (int i = 0; i < instructions_per_frame; i++){
             chip.decode_execute();
         }
         graphicslib.printscreen(chip.ret_display());

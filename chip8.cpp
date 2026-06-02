@@ -192,6 +192,7 @@ RENDER_STATE Chip8::decode_execute(){
                     for (int i = 0;i < TOT_KEYS;i++){
                         if (keys[i]){
                             regs[X] = i;
+                            break;
                         }
                         else if (i == TOT_KEYS - 1){
                             pc -= 2;
