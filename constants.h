@@ -8,3 +8,6 @@
 #define INSTRUCTION_RATE 700
 #define FPS 60
 #define TOT_FONTS 16
+#define SPEAKER_FREQ 44100
+#define BEEP_FREQ 440
+#define SAMPLES 1024

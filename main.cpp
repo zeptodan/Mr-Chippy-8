@@ -34,8 +34,19 @@ void process_event(Keys& keys, SDL_Event& ev){
         break;
     }
 }
-void play_sound(bool ring){
-
+void play_sound(SDL_AudioDeviceID device,std::array<int16_t,SAMPLES>& buffer){
+    double phase = 0;
+    double frequency = BEEP_FREQ;
+    while (SDL_GetQueuedAudioSize(device) < SAMPLES * 2){
+        for(int i = 0;i < SAMPLES;i++){
+            buffer[i] = (phase > 0.5) ? 3000 : -3000;
+            phase += frequency / SPEAKER_FREQ;
+            if (phase >= 1){
+                phase -= 1;
+            }
+        }
+        SDL_QueueAudio(device,buffer.data(),buffer.size() * sizeof(int16_t));
+    }
 }
 int main(int argc, char* argv[]){
     if (argc != 2){
@@ -48,6 +59,15 @@ int main(int argc, char* argv[]){
     SDL_Event ev;
     bool ring = false;
     uint64_t start, end, ms_per_frame = 1000 / FPS;
+    SDL_AudioSpec spec;
+    spec.freq = SPEAKER_FREQ;
+    spec.format = AUDIO_S16SYS;
+    spec.channels = 1;
+    spec.samples = SAMPLES;
+    spec.callback = nullptr;
+    SDL_AudioDeviceID device = SDL_OpenAudioDevice(nullptr,0,&spec,nullptr,0);
+    SDL_PauseAudioDevice(device,0);
+    std::array<int16_t,SAMPLES> buffer;
     while(true){
         start = SDL_GetTicks64();
         if (SDL_PollEvent(&ev) != 0){
@@ -62,6 +82,8 @@ int main(int argc, char* argv[]){
             SDL_Delay(ms_per_frame - (end - start));
         }
         ring = chip.update_timers();
-        play_sound(ring);
+        if (ring){
+            play_sound(device,buffer);
+        }
     }
 }

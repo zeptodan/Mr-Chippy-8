@@ -103,7 +103,7 @@ RENDER_STATE Chip8::decode_execute(){
                     }
                     break;
                 case 0x0006:
-                    regs[X] = regs[Y];
+                    //regs[X] = regs[Y];
                     regs[0xF] = regs[X] & 0x01;
                     regs[X] >>= 1;
                     break;
@@ -117,7 +117,7 @@ RENDER_STATE Chip8::decode_execute(){
                     }
                     break;
                 case 0x000E:
-                    regs[X] = regs[Y];
+                    //regs[X] = regs[Y];
                     regs[0xF] = (regs[X] >> 7) & 0x01;
                     regs[X] <<= 1;
                     break;
