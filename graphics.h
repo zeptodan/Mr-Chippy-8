@@ -10,5 +10,6 @@ class GraphicsLib {
     public:
     GraphicsLib();
     ~GraphicsLib();
-    void printscreen(uint8_t*);
+    void printscreen(uint8_t*,bool);
+    void setRes(bool);
 };

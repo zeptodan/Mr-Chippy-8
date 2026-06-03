@@ -78,7 +78,11 @@ int main(int argc, char* argv[]){
         for (int i = 0; i < instructions_per_frame; i++){
             chip.decode_execute();
         }
-        graphicslib.printscreen(chip.ret_display());
+        if (chip.has_resChanged()){
+            chip.set_has_resChanged(false);
+            graphicslib.setRes(chip.getQuirks().high_res);
+        }
+        graphicslib.printscreen(chip.ret_display(),chip.getQuirks().high_res);
         end = SDL_GetTicks64();
         if (end - start < ms_per_frame){
             SDL_Delay(ms_per_frame - (end - start));

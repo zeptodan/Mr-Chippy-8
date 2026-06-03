@@ -15,6 +15,15 @@ uint16_t Chip8::fetch(){
     pc +=2;
     return op;
 }
+const Quirks& Chip8::getQuirks() const {
+    return quirks;
+}
+bool Chip8::has_resChanged(){
+    return has_res_changed;
+}
+void Chip8::set_has_resChanged(bool has){
+    has_res_changed = has;
+}
 RENDER_STATE Chip8::decode_execute(){
     uint16_t op = fetch();
     uint16_t X = (op & 0x0F00) >> 8;
@@ -25,15 +34,23 @@ RENDER_STATE Chip8::decode_execute(){
     switch (op & 0xF000)
     {
         case 0x0000:
-            switch (op & 0x000F)
+            switch (op)
             {
-                case 0x0000:
+                case 0x00E0:
                     disp.fill(0);
                     return RENDER_STATE_RENDER;
                     break;
-                case 0x000E:
+                case 0x00EE:
                     pc = stack.top();
                     stack.pop();
+                    break;
+                case 0x00FE:
+                    quirks.high_res = false;
+                    has_res_changed = true;
+                    break;
+                case 0x00FF:
+                    quirks.high_res = true;
+                    has_res_changed = true;
                     break;
                 default:
                     std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;

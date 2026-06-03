@@ -8,8 +8,13 @@ enum RENDER_STATE {
     RENDER_STATE_NOT_RENDER
 };
 using Keys = std::array<bool,TOT_KEYS>;
+struct Quirks {
+    bool high_res = false;
+};
 class Chip8 {
     private:
+    Quirks quirks{};
+    bool has_res_changed = false;
     std::array<uint8_t,CHIP_8_X * CHIP_8_Y> disp{};
     Keys keys{};
     std::array<uint8_t,TOT_FONTS * 5> fonts = {
@@ -46,4 +51,7 @@ class Chip8 {
     void check_input();
     Keys& ret_keys();
     bool update_timers();
+    const Quirks& getQuirks() const;
+    bool has_resChanged();
+    void set_has_resChanged(bool);
 };
