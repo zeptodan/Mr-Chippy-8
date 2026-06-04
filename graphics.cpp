@@ -14,7 +14,7 @@ void GraphicsLib::printscreen(uint8_t* disp,bool high_res){
     int row_len = high_res ? CHIP_8_X : CHIP_8_X / 2;
     int col_len = high_res ? CHIP_8_Y : CHIP_8_Y / 2;
     int size = row_len * col_len;
-    for (std::size_t i = 0,j = 0; i < size;i++,j++){
+    for (int i = 0,j = 0; i < size;i++,j++){
         if (j % CHIP_8_X >= row_len){
             int row_no = j / CHIP_8_X;
             j = (row_no + 1) * CHIP_8_X;

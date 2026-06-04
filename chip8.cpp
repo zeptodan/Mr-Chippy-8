@@ -70,7 +70,7 @@ RENDER_STATE Chip8::decode_execute(){
                             disp[i + j * CHIP_8_X - 4] = disp[i + j * CHIP_8_X];
                         }
                     }
-                    for(int i = cols - 1; i >= cols - 5;i--){
+                    for(int i = cols - 1; i > cols - 5;i--){
                         for(int j = 0;j < rows;j++){
                             disp[i + j * CHIP_8_X] = 0;
                         }
@@ -164,7 +164,7 @@ RENDER_STATE Chip8::decode_execute(){
                     regs[X] += regs[Y];
                     break;
                 case 0x0005:
-                    if (regs[X] - regs[Y] <0){
+                    if (regs[X]  < regs[Y]){
                         regs[0xF] = 0;
                     }
                     else {
@@ -178,7 +178,7 @@ RENDER_STATE Chip8::decode_execute(){
                     regs[X] >>= 1;
                     break;
                 case 0x0007:
-                    if (regs[Y] - regs[X] <0){
+                    if (regs[Y] < regs[X]){
                         regs[0xF] = 0;
                     }
                     else {
@@ -209,7 +209,7 @@ RENDER_STATE Chip8::decode_execute(){
             pc = NNN + regs[0x0];
             break;
         case 0xC000:
-            regs[X] = (rand() % NN) & NN;
+            regs[X] = (rand() & 0xFF) & NN;
             break;
         case 0xD000:
         {
@@ -227,7 +227,7 @@ RENDER_STATE Chip8::decode_execute(){
             }
             for (int row = 0; row < rows;row++){
                 if (N == 0){
-                    pixels = (ram[index + 2 * row] >> 8) | ram[index + 2 * row + 1];
+                    pixels = (ram[index + 2 * row] << 8) | ram[index + 2 * row + 1];
                 }
                 else{
                     pixels = ram[index + row];
@@ -316,11 +316,13 @@ RENDER_STATE Chip8::decode_execute(){
                     for (int i = 0; i <= X; i++){
                         ram[index + i] = regs[i]; 
                     }
+                    //index += X + 1;
                     break;
                 case 0x0065:
                     for (int i = 0; i <= X; i++){
                         regs[i] = ram[index + i]; 
                     }
+                    //index += X + 1;
                     break;
                 case 0x0075:
                     for (int i = 0; i <= X; i++){
