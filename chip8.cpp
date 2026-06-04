@@ -281,7 +281,7 @@ RENDER_STATE Chip8::decode_execute(){
                     index += regs[X];
                     break;
                 case 0x0029:
-                    index = ram[regs[X] * 5];
+                    index = regs[X] * 5;
                     break;
                 case 0x0033:
                 {
