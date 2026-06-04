@@ -2,7 +2,8 @@
 #include<iostream>
 #include"chip8.h"
 Chip8::Chip8 () {
-    std::copy(ram.begin(),ram.begin() + fonts.size(),fonts.begin());
+    std::copy(fonts.begin(),fonts.end(),ram.begin());
+    std::copy(big_fonts.begin(),big_fonts.end(),ram.begin() + BIG_FONT_START);
 }
 void Chip8::load_rom(std::string file_path){
     std::ifstream file(file_path, std::ios::binary);
@@ -45,6 +46,7 @@ RENDER_STATE Chip8::decode_execute(){
                     stack.pop();
                     break;
                 case 0x00FB:
+                {
                     int cols = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
                     int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                     for(int i = cols - 5;i >=0;i--){
@@ -57,8 +59,10 @@ RENDER_STATE Chip8::decode_execute(){
                             disp[i + j * CHIP_8_X] = 0;
                         }
                     }
+                }
                     break;
                 case 0x00FC:
+                {
                     int cols = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
                     int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                     for(int i = 4;i < cols;i++){
@@ -71,6 +75,7 @@ RENDER_STATE Chip8::decode_execute(){
                             disp[i + j * CHIP_8_X] = 0;
                         }
                     }
+                }
                     break;
                 case 0x00FE:
                     quirks.high_res = false;
