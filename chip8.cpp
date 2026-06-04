@@ -151,22 +151,22 @@ RENDER_STATE Chip8::decode_execute(){
                     regs[X] ^= regs[Y];
                     break;
                 case 0x0004:
-                    regs[X] += regs[Y];
                     if (regs[X] + regs[Y] > 255){
                         regs[0xF] = 1;
                     }
                     else{
                         regs[0xF] = 0;
                     }
+                    regs[X] += regs[Y];
                     break;
                 case 0x0005:
-                    regs[X] -= regs[Y];
                     if (regs[X] - regs[Y] <0){
                         regs[0xF] = 0;
                     }
                     else {
                         regs[0xF] = 1;
                     }
+                    regs[X] -= regs[Y];
                     break;
                 case 0x0006:
                     //regs[X] = regs[Y];
@@ -174,13 +174,13 @@ RENDER_STATE Chip8::decode_execute(){
                     regs[X] >>= 1;
                     break;
                 case 0x0007:
-                    regs[X] = regs[Y] - regs[X];
                     if (regs[Y] - regs[X] <0){
                         regs[0xF] = 0;
                     }
                     else {
                         regs[0xF] = 1;
                     }
+                    regs[X] = regs[Y] - regs[X];
                     break;
                 case 0x000E:
                     //regs[X] = regs[Y];
