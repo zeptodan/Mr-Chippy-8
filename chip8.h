@@ -70,6 +70,7 @@ class Chip8 {
         0xFF, 0xFF, 0xC0, 0xC0, 0xFC,0xFC, 0xC0, 0xC0, 0xC0, 0xC0
     };
     std::array<uint8_t,RAM_SIZE> ram;
+    std::array<uint8_t,TOT_REGS> rpl{};
     std::array<uint8_t,TOT_REGS> regs{};
     std::stack<uint16_t> stack;
     uint16_t pc{};

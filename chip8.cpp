@@ -77,6 +77,10 @@ RENDER_STATE Chip8::decode_execute(){
                     }
                 }
                     break;
+                case 0x00FD:
+                    std::cout << "Exiting Emulator" << std::endl;
+                    exit(1);
+                    break;
                 case 0x00FE:
                     quirks.high_res = false;
                     has_res_changed = true;
@@ -208,30 +212,42 @@ RENDER_STATE Chip8::decode_execute(){
             regs[X] = (rand() % NN) & NN;
             break;
         case 0xD000:
+        {
             regs[0xF] = 0;
-            {
-                int row_len = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
-                int col_len = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
-                uint8_t VX = regs[X] % row_len;
-                uint8_t VY = regs[Y] % col_len;
-                for (int row = 0;row < N;row++){
-                    uint8_t pixels = ram[index + row];
-                    for(int bit = 0;bit < 8;bit++){
-                        int pos = VX + CHIP_8_X * (VY + row) + bit;
-                        if (VX + bit >= CHIP_8_X){
-                            continue;
-                        }
-                        if (VY + row >= CHIP_8_Y){
-                            continue;
-                        }
-                        uint8_t pixel = (pixels >> (7 - bit)) & 1;
-                        if (disp[pos] && pixel){
-                            regs[0xF] = 1;
-                        }
-                        disp[pos] ^= pixel;
+            int row_len = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
+            int col_len = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
+            uint8_t VX = regs[X] % row_len;
+            uint8_t VY = regs[Y] % col_len;
+            uint16_t pixels;
+            uint16_t rows = N;
+            uint8_t tot_bits = 8;
+            if (N == 0){
+                rows = 16;
+                tot_bits = 16;
+            }
+            for (int row = 0; row < rows;row++){
+                if (N == 0){
+                    pixels = (ram[index + 2 * row] >> 8) | ram[index + 2 * row + 1];
+                }
+                else{
+                    pixels = ram[index + row];
+                }
+                for (int bit = 0;bit < tot_bits;bit++){
+                    int pos = VX + CHIP_8_X * (VY + row) + bit;
+                    if (VX + bit >= row_len){
+                        continue;
                     }
+                    if (VY + row >= col_len){
+                        continue;
+                    }
+                    uint8_t pixel = (pixels >> (tot_bits - 1 - bit)) & 1;
+                    if (disp[pos] && pixel){
+                        regs[0xF] = 1;
+                    }
+                    disp[pos] ^= pixel;
                 }
             }
+        }
             return RENDER_STATE_RENDER;
             break;
         case 0xE000:
@@ -277,16 +293,14 @@ RENDER_STATE Chip8::decode_execute(){
                     s_time = regs[X];
                     break;
                 case 0x001E:
-                    if (!(index & 0xF000) && ((index + regs[X]) & 0xF000)){
-                        regs[0xF] = 1;
-                    }
-                    else {
-                        regs[0xF] = 0;
-                    }
+                    regs[0xF] = ((index + regs[X]) > 0x0FFF);
                     index += regs[X];
                     break;
                 case 0x0029:
                     index = regs[X] * 5;
+                    break;
+                case 0x0030:
+                    index = BIG_FONT_START + regs[X] * 10;
                     break;
                 case 0x0033:
                 {
@@ -306,6 +320,16 @@ RENDER_STATE Chip8::decode_execute(){
                 case 0x0065:
                     for (int i = 0; i <= X; i++){
                         regs[i] = ram[index + i]; 
+                    }
+                    break;
+                case 0x0075:
+                    for (int i = 0; i <= X; i++){
+                        rpl[i] = regs[i]; 
+                    }
+                    break;
+                case 0x0085:
+                    for (int i = 0; i <= X; i++){
+                        regs[i] = rpl[i]; 
                     }
                     break;
                 default:
