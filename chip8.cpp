@@ -2,7 +2,7 @@
 #include<iostream>
 #include"chip8.h"
 Chip8::Chip8 () {
-    std::copy(ram.begin(),ram.begin() + fonts.size(),fonts.begin());
+    std::copy(fonts.begin(),fonts.end(),ram.begin());
 }
 void Chip8::load_rom(std::string file_path){
     std::ifstream file(file_path, std::ios::binary);
