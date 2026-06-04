@@ -44,6 +44,34 @@ RENDER_STATE Chip8::decode_execute(){
                     pc = stack.top();
                     stack.pop();
                     break;
+                case 0x00FB:
+                    int cols = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
+                    int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
+                    for(int i = cols - 5;i >=0;i--){
+                        for(int j = 0;j < rows;j++){
+                            disp[i + j * CHIP_8_X + 4] = disp[i + j * CHIP_8_X];
+                        }
+                    }
+                    for(int i = 0; i < 4;i++){
+                        for(int j = 0;j < rows;j++){
+                            disp[i + j * CHIP_8_X] = 0;
+                        }
+                    }
+                    break;
+                case 0x00FC:
+                    int cols = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
+                    int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
+                    for(int i = 4;i < cols;i++){
+                        for(int j = 0;j < rows;j++){
+                            disp[i + j * CHIP_8_X - 4] = disp[i + j * CHIP_8_X];
+                        }
+                    }
+                    for(int i = cols - 1; i >= cols - 5;i--){
+                        for(int j = 0;j < rows;j++){
+                            disp[i + j * CHIP_8_X] = 0;
+                        }
+                    }
+                    break;
                 case 0x00FE:
                     quirks.high_res = false;
                     has_res_changed = true;
@@ -53,8 +81,24 @@ RENDER_STATE Chip8::decode_execute(){
                     has_res_changed = true;
                     break;
                 default:
-                    std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
-                    exit(1);
+                    if ((op & 0x0FF0) == 0x00C0){
+                        int cols = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
+                        int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
+                        for(int i = rows - N - 1;i >= 0 ;i--){
+                            for(int j = 0;j < cols;j++){
+                                disp[j + (i + N) * CHIP_8_X] = disp[j + i * CHIP_8_X];
+                            }
+                        }
+                        for(int i = 0;i < N ;i++){
+                            for(int j = 0;j < cols;j++){
+                                disp[j + i * CHIP_8_X] = 0;
+                            }
+                        }
+                    }
+                    else{
+                        std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
+                        exit(1);
+                    }
                     break;
             }
             break;
