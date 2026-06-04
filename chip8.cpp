@@ -299,12 +299,12 @@ RENDER_STATE Chip8::decode_execute(){
                 }
                     break;
                 case 0x0055:
-                    for (int i = 0; i < X; i++){
+                    for (int i = 0; i <= X; i++){
                         ram[index + i] = regs[i]; 
                     }
                     break;
                 case 0x0065:
-                    for (int i = 0; i < X; i++){
+                    for (int i = 0; i <= X; i++){
                         regs[i] = ram[index + i]; 
                     }
                     break;
