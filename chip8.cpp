@@ -210,13 +210,18 @@ RENDER_STATE Chip8::decode_execute(){
         case 0xD000:
             regs[0xF] = 0;
             {
-                uint8_t VX = regs[X] % CHIP_8_X;
-                uint8_t VY = regs[Y] % CHIP_8_Y;
+                int row_len = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
+                int col_len = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
+                uint8_t VX = regs[X] % row_len;
+                uint8_t VY = regs[Y] % col_len;
                 for (int row = 0;row < N;row++){
                     uint8_t pixels = ram[index + row];
                     for(int bit = 0;bit < 8;bit++){
                         int pos = VX + CHIP_8_X * (VY + row) + bit;
                         if (VX + bit >= CHIP_8_X){
+                            continue;
+                        }
+                        if (VY + row >= CHIP_8_Y){
                             continue;
                         }
                         uint8_t pixel = (pixels >> (7 - bit)) & 1;
