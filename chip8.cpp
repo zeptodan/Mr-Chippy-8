@@ -147,49 +147,70 @@ RENDER_STATE Chip8::decode_execute(){
                     break;
                 case 0x0001:
                     regs[X] |= regs[Y];
+                    //regs[0xF] = 0;
                     break;
                 case 0x0002:
                     regs[X] &= regs[Y];
+                    //regs[0xF] = 0;
                     break;
                 case 0x0003:
                     regs[X] ^= regs[Y];
+                    //regs[0xF] = 0;
                     break;
                 case 0x0004:
+                {
+                    uint8_t flag;
                     if (regs[X] + regs[Y] > 255){
-                        regs[0xF] = 1;
+                        flag = 1;
                     }
                     else{
-                        regs[0xF] = 0;
+                        flag = 0;
                     }
                     regs[X] += regs[Y];
+                    regs[0xF] = flag;
+                }
                     break;
                 case 0x0005:
+                {
+                    uint8_t flag;
                     if (regs[X]  < regs[Y]){
-                        regs[0xF] = 0;
+                        flag = 0;
                     }
                     else {
-                        regs[0xF] = 1;
+                        flag = 1;
                     }
                     regs[X] -= regs[Y];
+                    regs[0xF] = flag;
+                }
                     break;
                 case 0x0006:
+                {
                     //regs[X] = regs[Y];
-                    regs[0xF] = regs[X] & 0x01;
+                    uint8_t flag = regs[X] & 0x01;
                     regs[X] >>= 1;
+                    regs[0xF] = flag;
+                }
                     break;
                 case 0x0007:
+                {
+                    uint8_t flag;
                     if (regs[Y] < regs[X]){
-                        regs[0xF] = 0;
+                        flag = 0;
                     }
                     else {
-                        regs[0xF] = 1;
+                        flag = 1;
                     }
                     regs[X] = regs[Y] - regs[X];
+                    regs[0xF] = flag;
+                }
                     break;
                 case 0x000E:
+                {
                     //regs[X] = regs[Y];
-                    regs[0xF] = (regs[X] >> 7) & 0x01;
+                    uint8_t flag = (regs[X] >> 7) & 0x01;
                     regs[X] <<= 1;
+                    regs[0xF] = flag;
+                }
                     break;
                 default:
                     std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
@@ -293,8 +314,11 @@ RENDER_STATE Chip8::decode_execute(){
                     s_time = regs[X];
                     break;
                 case 0x001E:
-                    regs[0xF] = ((index + regs[X]) > 0x0FFF);
+                {
+                    uint8_t flag = ((index + regs[X]) > 0x0FFF);
                     index += regs[X];
+                    regs[0xF] = flag;
+                }
                     break;
                 case 0x0029:
                     index = regs[X] * 5;
