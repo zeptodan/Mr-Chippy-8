@@ -230,7 +230,7 @@ RENDER_STATE Chip8::decode_execute(){
             pc = NNN + regs[0x0];
             break;
         case 0xC000:
-            regs[X] = (rand() & 0xFF) & NN;
+            regs[X] = (rng() & 0xFF) & NN;
             break;
         case 0xD000:
         {

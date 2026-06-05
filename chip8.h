@@ -2,6 +2,7 @@
 #include<array>
 #include<stack>
 #include<string>
+#include<random>
 #include"constants.h"
 enum RENDER_STATE {
     RENDER_STATE_RENDER,
@@ -15,6 +16,7 @@ class Chip8 {
     private:
     Quirks quirks{};
     bool has_res_changed = false;
+    std::mt19937 rng{std::random_device{}()};
     std::array<uint8_t,CHIP_8_X * CHIP_8_Y> disp{};
     Keys keys{};
     std::array<uint8_t,TOT_FONTS * 5> fonts = {
