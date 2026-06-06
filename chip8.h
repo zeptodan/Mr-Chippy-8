@@ -16,8 +16,10 @@ class Chip8 {
     private:
     Quirks quirks{};
     bool has_res_changed = false;
+    double pitch = BEEP_FREQ;
     std::mt19937 rng{std::random_device{}()};
     std::array<uint8_t,CHIP_8_X * CHIP_8_Y> disp{};
+    std::array<uint8_t,SOUND_BUFFER_SIZE> sound_buffer{};
     Keys keys{};
     std::array<uint8_t,TOT_FONTS * 5> fonts = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -91,4 +93,6 @@ class Chip8 {
     const Quirks& getQuirks() const;
     bool has_resChanged();
     void set_has_resChanged(bool);
+    double get_pitch() const;
+    std::array<uint8_t,SOUND_BUFFER_SIZE>& get_sound_buffer();
 };

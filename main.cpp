@@ -35,19 +35,18 @@ void process_event(Keys& keys, SDL_Event& ev){
         break;
     }
 }
-void play_sound(SDL_AudioDeviceID device,std::array<int16_t,SAMPLES>& buffer){
+void play_sound(SDL_AudioDeviceID device,std::array<int16_t,SAMPLES>& buffer,std::array<uint8_t,SOUND_BUFFER_SIZE>& sound_buffer,double pitch){
     double phase = 0;
-    double frequency = BEEP_FREQ;
-    while (SDL_GetQueuedAudioSize(device) < SAMPLES * 2){
-        for(int i = 0;i < SAMPLES;i++){
-            buffer[i] = (phase > 0.5) ? 3000 : -3000;
-            phase += frequency / SPEAKER_FREQ;
-            if (phase >= 1){
-                phase -= 1;
-            }
+    int index;
+    for(int i = 0;i < SAMPLES;i++){
+        while (phase >= 1){
+            phase -= 1;
         }
-        SDL_QueueAudio(device,buffer.data(),buffer.size() * sizeof(int16_t));
+        index = static_cast<int>(phase * SOUND_BUFFER_SIZE);
+        buffer[i] = sound_buffer[index] ? 3000 : -3000;
+        phase += pitch / SPEAKER_FREQ;
     }
+    SDL_QueueAudio(device,buffer.data(),buffer.size() * sizeof(int16_t));
 }
 int main(int argc, char* argv[]){
     if (argc != 2){
@@ -89,7 +88,7 @@ int main(int argc, char* argv[]){
         }
         ring = chip.update_timers();
         if (ring){
-            play_sound(device,buffer);
+            play_sound(device,buffer,chip.get_sound_buffer(),chip.get_pitch());
         }
     }
 }

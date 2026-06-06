@@ -4,6 +4,8 @@
 Chip8::Chip8 () {
     std::copy(fonts.begin(),fonts.end(),ram.begin());
     std::copy(big_fonts.begin(),big_fonts.end(),ram.begin() + BIG_FONT_START);
+    std::fill(sound_buffer.begin(), sound_buffer.begin() + (SOUND_BUFFER_SIZE / 2), 1);
+    std::fill(sound_buffer.begin() + (SOUND_BUFFER_SIZE / 2), sound_buffer.end(), 0);
 }
 void Chip8::load_rom(std::string file_path){
     std::ifstream file(file_path, std::ios::binary);
@@ -18,6 +20,12 @@ uint16_t Chip8::fetch(){
 }
 const Quirks& Chip8::getQuirks() const {
     return quirks;
+}
+double Chip8::get_pitch() const {
+    return pitch;
+}
+std::array<uint8_t,SOUND_BUFFER_SIZE>& Chip8::get_sound_buffer(){
+    return sound_buffer;
 }
 bool Chip8::has_resChanged(){
     return has_res_changed;
@@ -341,6 +349,8 @@ RENDER_STATE Chip8::decode_execute(){
                 case 0x0000:
                     index = fetch();
                     break;
+                case 0x0002:
+                    break;
                 case 0x0007:
                     regs[X] = d_time;
                     break;
@@ -383,6 +393,9 @@ RENDER_STATE Chip8::decode_execute(){
                     VX /= 10;
                     ram[index] = VX % 10;
                 }
+                    break;
+                case 0x003A:
+                    pitch = 4000 * std::pow(2, (regs[X] - 64) / 48);
                     break;
                 case 0x0055:
                     for (int i = 0; i <= X; i++){

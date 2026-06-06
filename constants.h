@@ -12,3 +12,4 @@
 #define BEEP_FREQ 440
 #define SAMPLES 1024
 #define BIG_FONT_START 0x100
+#define SOUND_BUFFER_SIZE 128
