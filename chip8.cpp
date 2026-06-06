@@ -104,6 +104,20 @@ RENDER_STATE Chip8::decode_execute(){
                             }
                         }
                     }
+                    else if ((op & 0x0FF0) == 0x00D0){
+                        int cols = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
+                        int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
+                        for(int i = N;i < rows ;i++){
+                            for(int j = 0;j < cols;j++){
+                                disp[j + (i - N) * CHIP_8_X] = disp[j + i * CHIP_8_X];
+                            }
+                        }
+                        for(int i = rows - 1;i > rows - N - 1 ;i--){
+                            for(int j = 0;j < cols;j++){
+                                disp[j + i * CHIP_8_X] = 0;
+                            }
+                        }
+                    }
                     else{
                         std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
                         exit(1);
@@ -129,8 +143,27 @@ RENDER_STATE Chip8::decode_execute(){
             }
             break;
         case 0x5000:
-            if (regs[X] == regs[Y]){
-                pc += 2;
+            switch (op & 0x000F)
+            {
+            case 0x0000:
+                if (regs[X] == regs[Y]){
+                    pc += 2;
+                }
+                break;
+            case 0x0002:
+                for (int i = X;i <= Y;i++){
+                    ram[index + i] = regs[i];
+                }
+                break;
+            case 0x0003:
+                for (int i = X;i <= Y;i++){
+                    regs[i] = ram[index + i];
+                }
+                break;
+            default:
+                std::cout << "unrecognized op " << std::hex <<  op << std::dec << std::endl;
+                exit(1);
+                break;
             }
             break;
         case 0x6000:
