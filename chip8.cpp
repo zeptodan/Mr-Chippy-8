@@ -134,12 +134,16 @@ RENDER_STATE Chip8::decode_execute(){
             break;
         case 0x3000:
             if (regs[X] == NN){
-                pc += 2;
+                if(fetch() == 0xF000){
+                    pc += 2;
+                }
             }
             break;
         case 0x4000:
             if (regs[X] != NN){
-                pc += 2;
+                if(fetch() == 0xF000){
+                    pc += 2;
+                }
             }
             break;
         case 0x5000:
@@ -147,7 +151,9 @@ RENDER_STATE Chip8::decode_execute(){
             {
             case 0x0000:
                 if (regs[X] == regs[Y]){
-                    pc += 2;
+                    if(fetch() == 0xF000){
+                        pc += 2;
+                    }
                 }
                 break;
             case 0x0002:
@@ -253,7 +259,9 @@ RENDER_STATE Chip8::decode_execute(){
             break;
         case 0x9000:
             if (regs[X] != regs[Y]){
-                pc += 2;
+                if(fetch() == 0xF000){
+                    pc += 2;
+                }
             }
             break;
         case 0xA000:
@@ -309,12 +317,16 @@ RENDER_STATE Chip8::decode_execute(){
             {
             case 0x009E:
                 if (keys[regs[X]]){
-                    pc+=2;
+                    if(fetch() == 0xF000){
+                        pc += 2;
+                    }
                 }
                 break;
             case 0x00A1:
                 if (!keys[regs[X]]){
-                    pc+=2;
+                    if(fetch() == 0xF000){
+                        pc += 2;
+                    }
                 }
                 break;
             default:
@@ -326,6 +338,9 @@ RENDER_STATE Chip8::decode_execute(){
         case 0xF000:
             switch (op & 0x00FF)
             {
+                case 0x0000:
+                    index = fetch();
+                    break;
                 case 0x0007:
                     regs[X] = d_time;
                     break;
