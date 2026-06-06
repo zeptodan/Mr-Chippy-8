@@ -350,6 +350,16 @@ RENDER_STATE Chip8::decode_execute(){
                     index = fetch();
                     break;
                 case 0x0002:
+                {
+                    int sound_index = 0;
+                    for (int i = index; i < index + 16;i++){
+                        uint8_t byte = ram[i];
+                        for (int bit = 0;bit < 8; bit++){
+                            uint8_t sound_bit = (byte >> 7 - bit) & 0x1;
+                            sound_buffer[sound_index++] = sound_bit;
+                        }
+                    }
+                }
                     break;
                 case 0x0007:
                     regs[X] = d_time;
