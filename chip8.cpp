@@ -36,6 +36,44 @@ void Chip8::set_has_resChanged(bool has){
 uint8_t Chip8::get_plane(){
     return plane;
 }
+void Chip8::draw_sprite(uint8_t X, uint8_t Y, uint8_t N, uint8_t plane, uint16_t index){
+    int row_len = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
+    int col_len = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
+    uint8_t VX = regs[X] % row_len;
+    uint8_t VY = regs[Y] % col_len;
+    uint16_t pixels;
+    uint16_t rows = N;
+    uint8_t tot_bits = 8;
+    if (N == 0){
+        rows = 16;
+        tot_bits = 16;
+    }
+    for (int row = 0; row < rows;row++){
+        if (N == 0){
+            pixels = (ram[index + 2 * row] << 8) | ram[index + 2 * row + 1];
+        }
+        else{
+            pixels = ram[index + row];
+        }
+        for (int bit = 0;bit < tot_bits;bit++){
+            int pos = VX + CHIP_8_X * (VY + row) + bit;
+            if (VX + bit >= row_len){
+                continue;
+            }
+            if (VY + row >= col_len){
+                continue;
+            }
+            uint8_t pixel = (pixels >> (tot_bits - 1 - bit)) & 1;
+            if (plane == 2){
+                pixel <<= 1;
+            }
+            if ((disp[pos] & plane) && pixel){
+                regs[0xF] = 1;
+            }
+            disp[pos] ^= pixel;
+        }
+    }
+}
 RENDER_STATE Chip8::decode_execute(){
     uint16_t op = fetch();
     uint16_t X = (op & 0x0F00) >> 8;
@@ -49,7 +87,7 @@ RENDER_STATE Chip8::decode_execute(){
             switch (op)
             {
                 case 0x00E0:
-                for (int i = 0; i < disp.size(); i++){
+                for (std::size_t i = 0; i < disp.size(); i++){
                     disp[i] &= ~plane;
                 }
                     return RENDER_STATE_RENDER;
@@ -171,12 +209,12 @@ RENDER_STATE Chip8::decode_execute(){
                 break;
             case 0x0002:
                 for (int i = X;i <= Y;i++){
-                    ram[index + i] = regs[i];
+                    ram[index + i - X] = regs[i];
                 }
                 break;
             case 0x0003:
                 for (int i = X;i <= Y;i++){
-                    regs[i] = ram[index + i];
+                    regs[i] = ram[index + i - X];
                 }
                 break;
             default:
@@ -287,42 +325,17 @@ RENDER_STATE Chip8::decode_execute(){
             regs[X] = (rng() & 0xFF) & NN;
             break;
         case 0xD000:
-        {
             regs[0xF] = 0;
-            int row_len = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
-            int col_len = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
-            uint8_t VX = regs[X] % row_len;
-            uint8_t VY = regs[Y] % col_len;
-            uint16_t pixels;
-            uint16_t rows = N;
-            uint8_t tot_bits = 8;
-            if (N == 0){
-                rows = 16;
-                tot_bits = 16;
-            }
-            for (int row = 0; row < rows;row++){
-                if (N == 0){
-                    pixels = (ram[index + 2 * row] << 8) | ram[index + 2 * row + 1];
+            {
+                uint8_t temp = 0;
+                if (plane & 0x1){
+                    draw_sprite(X,Y,N,plane & 0x1,index);
+                    temp = N ? N : 16;
                 }
-                else{
-                    pixels = ram[index + row];
-                }
-                for (int bit = 0;bit < tot_bits;bit++){
-                    int pos = VX + CHIP_8_X * (VY + row) + bit;
-                    if (VX + bit >= row_len){
-                        continue;
-                    }
-                    if (VY + row >= col_len){
-                        continue;
-                    }
-                    uint8_t pixel = (pixels >> (tot_bits - 1 - bit)) & 1;
-                    if (disp[pos] && pixel){
-                        regs[0xF] = 1;
-                    }
-                    disp[pos] ^= pixel;
+                if (plane & 0x2){
+                    draw_sprite(X,Y,N,plane & 0x2,index + temp);
                 }
             }
-        }
             return RENDER_STATE_RENDER;
             break;
         case 0xE000:
@@ -355,7 +368,7 @@ RENDER_STATE Chip8::decode_execute(){
                     index = fetch();
                     break;
                 case 0x0001:
-                    plane = N;
+                    plane = X;
                     break;
                 case 0x0002:
                 {
@@ -363,7 +376,7 @@ RENDER_STATE Chip8::decode_execute(){
                     for (int i = index; i < index + 16;i++){
                         uint8_t byte = ram[i];
                         for (int bit = 0;bit < 8; bit++){
-                            uint8_t sound_bit = (byte >> 7 - bit) & 0x1;
+                            uint8_t sound_bit = (byte >> (7 - bit)) & 0x1;
                             sound_buffer[sound_index++] = sound_bit;
                         }
                     }

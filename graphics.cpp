@@ -19,7 +19,7 @@ void GraphicsLib::printscreen(uint8_t* disp,bool high_res){
             int row_no = j / CHIP_8_X;
             j = (row_no + 1) * CHIP_8_X;
         }
-        sdl_disp[i] = (disp[j] == 0 ? 0x000000FF : 0xFFFFFFFF);
+        sdl_disp[i] = colors[disp[j]];
     }
     SDL_UpdateTexture(texture,NULL,sdl_disp.data(),row_len * sizeof(uint32_t));
     SDL_Rect rect{0,0,CHIP_8_X * SCALE, CHIP_8_Y * SCALE};

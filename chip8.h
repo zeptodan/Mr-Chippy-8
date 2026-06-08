@@ -97,4 +97,5 @@ class Chip8 {
     double get_pitch() const;
     std::array<uint8_t,SOUND_BUFFER_SIZE>& get_sound_buffer();
     uint8_t get_plane();
+    void draw_sprite(uint8_t X, uint8_t Y, uint8_t N, uint8_t plane, uint16_t index);
 };

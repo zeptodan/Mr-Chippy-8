@@ -1,7 +1,7 @@
 #define CHIP_8_X 128
 #define CHIP_8_Y 64
 #define SCALE 10
-#define RAM_SIZE 4096
+#define RAM_SIZE 65536
 #define TOT_REGS 16
 #define ROM_START 512
 #define TOT_KEYS 16
@@ -13,3 +13,4 @@
 #define SAMPLES 1024
 #define BIG_FONT_START 0x100
 #define SOUND_BUFFER_SIZE 128
+#define TOT_COLORS 4
