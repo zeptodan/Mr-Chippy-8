@@ -17,6 +17,7 @@ class Chip8 {
     Quirks quirks{};
     bool has_res_changed = false;
     double pitch = BEEP_FREQ;
+    uint8_t plane{1};
     std::mt19937 rng{std::random_device{}()};
     std::array<uint8_t,CHIP_8_X * CHIP_8_Y> disp{};
     std::array<uint8_t,SOUND_BUFFER_SIZE> sound_buffer{};
@@ -95,4 +96,5 @@ class Chip8 {
     void set_has_resChanged(bool);
     double get_pitch() const;
     std::array<uint8_t,SOUND_BUFFER_SIZE>& get_sound_buffer();
+    uint8_t get_plane();
 };

@@ -33,6 +33,9 @@ bool Chip8::has_resChanged(){
 void Chip8::set_has_resChanged(bool has){
     has_res_changed = has;
 }
+uint8_t Chip8::get_plane(){
+    return plane;
+}
 RENDER_STATE Chip8::decode_execute(){
     uint16_t op = fetch();
     uint16_t X = (op & 0x0F00) >> 8;
@@ -46,7 +49,9 @@ RENDER_STATE Chip8::decode_execute(){
             switch (op)
             {
                 case 0x00E0:
-                    disp.fill(0);
+                for (int i = 0; i < disp.size(); i++){
+                    disp[i] &= ~plane;
+                }
                     return RENDER_STATE_RENDER;
                     break;
                 case 0x00EE:
@@ -59,12 +64,12 @@ RENDER_STATE Chip8::decode_execute(){
                     int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                     for(int i = cols - 5;i >=0;i--){
                         for(int j = 0;j < rows;j++){
-                            disp[i + j * CHIP_8_X + 4] = disp[i + j * CHIP_8_X];
+                            disp[i + j * CHIP_8_X + 4] |= disp[i + j * CHIP_8_X] & plane;
                         }
                     }
                     for(int i = 0; i < 4;i++){
                         for(int j = 0;j < rows;j++){
-                            disp[i + j * CHIP_8_X] = 0;
+                            disp[i + j * CHIP_8_X] &= ~plane;
                         }
                     }
                 }
@@ -75,12 +80,12 @@ RENDER_STATE Chip8::decode_execute(){
                     int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                     for(int i = 4;i < cols;i++){
                         for(int j = 0;j < rows;j++){
-                            disp[i + j * CHIP_8_X - 4] = disp[i + j * CHIP_8_X];
+                            disp[i + j * CHIP_8_X - 4] |= disp[i + j * CHIP_8_X] & plane;
                         }
                     }
                     for(int i = cols - 1; i > cols - 5;i--){
                         for(int j = 0;j < rows;j++){
-                            disp[i + j * CHIP_8_X] = 0;
+                            disp[i + j * CHIP_8_X] &= ~plane;
                         }
                     }
                 }
@@ -103,12 +108,12 @@ RENDER_STATE Chip8::decode_execute(){
                         int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                         for(int i = rows - N - 1;i >= 0 ;i--){
                             for(int j = 0;j < cols;j++){
-                                disp[j + (i + N) * CHIP_8_X] = disp[j + i * CHIP_8_X];
+                                disp[j + (i + N) * CHIP_8_X] |= disp[j + i * CHIP_8_X] & plane;
                             }
                         }
                         for(int i = 0;i < N ;i++){
                             for(int j = 0;j < cols;j++){
-                                disp[j + i * CHIP_8_X] = 0;
+                                disp[j + i * CHIP_8_X] &= ~plane;
                             }
                         }
                     }
@@ -117,12 +122,12 @@ RENDER_STATE Chip8::decode_execute(){
                         int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                         for(int i = N;i < rows ;i++){
                             for(int j = 0;j < cols;j++){
-                                disp[j + (i - N) * CHIP_8_X] = disp[j + i * CHIP_8_X];
+                                disp[j + (i - N) * CHIP_8_X] |= disp[j + i * CHIP_8_X] & plane;
                             }
                         }
                         for(int i = rows - 1;i > rows - N - 1 ;i--){
                             for(int j = 0;j < cols;j++){
-                                disp[j + i * CHIP_8_X] = 0;
+                                disp[j + i * CHIP_8_X] &= ~plane;
                             }
                         }
                     }
@@ -348,6 +353,9 @@ RENDER_STATE Chip8::decode_execute(){
             {
                 case 0x0000:
                     index = fetch();
+                    break;
+                case 0x0001:
+                    plane = N;
                     break;
                 case 0x0002:
                 {
