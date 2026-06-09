@@ -36,11 +36,11 @@ void Chip8::set_has_resChanged(bool has){
 uint8_t Chip8::get_plane(){
     return plane;
 }
-void Chip8::draw_sprite(uint8_t X, uint8_t Y, uint8_t N, uint8_t plane, uint16_t index){
+void Chip8::draw_sprite(uint8_t VX, uint8_t VY, uint8_t N, uint8_t plane, uint16_t index){
     int row_len = quirks.high_res ? CHIP_8_X : CHIP_8_X / 2;
     int col_len = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
-    uint8_t VX = regs[X] % row_len;
-    uint8_t VY = regs[Y] % col_len;
+    VX = VX % row_len;
+    VY = VY % col_len;
     uint16_t pixels;
     uint16_t rows = N;
     uint8_t tot_bits = 8;
@@ -102,7 +102,7 @@ RENDER_STATE Chip8::decode_execute(){
                     int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                     for(int i = cols - 5;i >=0;i--){
                         for(int j = 0;j < rows;j++){
-                            disp[i + j * CHIP_8_X + 4] |= disp[i + j * CHIP_8_X] & plane;
+                            disp[i + j * CHIP_8_X + 4] = (disp[i + j * CHIP_8_X + 4] & (~plane)) | (disp[i + j * CHIP_8_X] & plane);
                         }
                     }
                     for(int i = 0; i < 4;i++){
@@ -118,7 +118,7 @@ RENDER_STATE Chip8::decode_execute(){
                     int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                     for(int i = 4;i < cols;i++){
                         for(int j = 0;j < rows;j++){
-                            disp[i + j * CHIP_8_X - 4] |= disp[i + j * CHIP_8_X] & plane;
+                            disp[i + j * CHIP_8_X - 4] = (disp[i + j * CHIP_8_X - 4] & (~plane)) | (disp[i + j * CHIP_8_X] & plane);
                         }
                     }
                     for(int i = cols - 1; i > cols - 5;i--){
@@ -146,7 +146,7 @@ RENDER_STATE Chip8::decode_execute(){
                         int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                         for(int i = rows - N - 1;i >= 0 ;i--){
                             for(int j = 0;j < cols;j++){
-                                disp[j + (i + N) * CHIP_8_X] |= disp[j + i * CHIP_8_X] & plane;
+                                disp[j + (i + N) * CHIP_8_X] = (disp[j + (i + N) * CHIP_8_X] & (~plane)) | (disp[j + i * CHIP_8_X] & plane);
                             }
                         }
                         for(int i = 0;i < N ;i++){
@@ -160,7 +160,7 @@ RENDER_STATE Chip8::decode_execute(){
                         int rows = quirks.high_res ? CHIP_8_Y : CHIP_8_Y / 2;
                         for(int i = N;i < rows ;i++){
                             for(int j = 0;j < cols;j++){
-                                disp[j + (i - N) * CHIP_8_X] |= disp[j + i * CHIP_8_X] & plane;
+                                disp[j + (i - N) * CHIP_8_X] = (disp[j + (i - N) * CHIP_8_X] & (~plane)) | (disp[j + i * CHIP_8_X] & plane);
                             }
                         }
                         for(int i = rows - 1;i > rows - N - 1 ;i--){
@@ -208,13 +208,17 @@ RENDER_STATE Chip8::decode_execute(){
                 }
                 break;
             case 0x0002:
-                for (int i = X;i <= Y;i++){
-                    ram[index + i - X] = regs[i];
+                for (int i = X, m = 0, step = (X <= Y) ? 1 : -1 ;;i += step, m++){
+                    ram[index + m] = regs[i];
+                    if (i == Y)
+                        break;
                 }
                 break;
             case 0x0003:
-                for (int i = X;i <= Y;i++){
-                    regs[i] = ram[index + i - X];
+                for (int i = X, m = 0, step = (X <= Y) ? 1 : -1 ;;i += step, m++){
+                    regs[i] = ram[index + m];
+                    if (i == Y)
+                        break;
                 }
                 break;
             default:
@@ -325,15 +329,16 @@ RENDER_STATE Chip8::decode_execute(){
             regs[X] = (rng() & 0xFF) & NN;
             break;
         case 0xD000:
-            regs[0xF] = 0;
             {
                 uint8_t temp = 0;
+                uint8_t VX = regs[X], VY = regs[Y];
+                regs[0xF] = 0;
                 if (plane & 0x1){
-                    draw_sprite(X,Y,N,plane & 0x1,index);
-                    temp = N ? N : 16;
+                    draw_sprite(VX,VY,N,plane & 0x1,index);
+                    temp = N ? N : 32;
                 }
                 if (plane & 0x2){
-                    draw_sprite(X,Y,N,plane & 0x2,index + temp);
+                    draw_sprite(VX,VY,N,plane & 0x2,index + temp);
                 }
             }
             return RENDER_STATE_RENDER;
