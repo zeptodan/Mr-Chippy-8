@@ -10,7 +10,7 @@
 #define TOT_FONTS 16
 #define SPEAKER_FREQ 44100
 #define BEEP_FREQ 440
-#define SAMPLES 1024
+#define SAMPLES 512
 #define BIG_FONT_START 0x100
 #define SOUND_BUFFER_SIZE 128
 #define TOT_COLORS 4

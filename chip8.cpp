@@ -279,7 +279,7 @@ RENDER_STATE Chip8::decode_execute(){
                     break;
                 case 0x0006:
                 {
-                    //regs[X] = regs[Y];
+                    regs[X] = regs[Y];
                     uint8_t flag = regs[X] & 0x01;
                     regs[X] >>= 1;
                     regs[0xF] = flag;
@@ -300,7 +300,7 @@ RENDER_STATE Chip8::decode_execute(){
                     break;
                 case 0x000E:
                 {
-                    //regs[X] = regs[Y];
+                    regs[X] = regs[Y];
                     uint8_t flag = (regs[X] >> 7) & 0x01;
                     regs[X] <<= 1;
                     regs[0xF] = flag;
@@ -431,7 +431,7 @@ RENDER_STATE Chip8::decode_execute(){
                 }
                     break;
                 case 0x003A:
-                    pitch = 4000 * std::pow(2, (regs[X] - 64) / 48);
+                    pitch = 4000.0 * std::pow(2.0, (regs[X] - 64.0) / 48.0);
                     break;
                 case 0x0055:
                     for (int i = 0; i <= X; i++){
