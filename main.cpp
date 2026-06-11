@@ -71,16 +71,16 @@ int main(int argc, char* argv[]){
     int instructions_per_frame = INSTRUCTION_RATE / FPS;
     while(true){
         start = SDL_GetTicks64();
-        if (SDL_PollEvent(&ev) != 0){
+        while (SDL_PollEvent(&ev) != 0){
             ImGui_ImplSDL2_ProcessEvent(&ev);
             process_event(chip.ret_keys(),ev);
+        }
+        for (int i = 0; i < instructions_per_frame; i++){
+            chip.decode_execute();
         }
         graphicslib.create_frame();
         graphicslib.create_menu_ui();
 
-        for (int i = 0; i < instructions_per_frame; i++){
-            chip.decode_execute();
-        }
         if (chip.has_resChanged()){
             chip.set_has_resChanged(false);
             graphicslib.setRes(chip.getQuirks().high_res);
