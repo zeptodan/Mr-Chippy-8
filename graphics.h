@@ -1,6 +1,9 @@
 #include<SDL2/SDL.h>
 #include<array>
 #include"constants.h"
+#include"imgui.h"
+#include"imgui_impl_sdl2.h"
+#include"imgui_impl_sdlrenderer2.h"
 class GraphicsLib {
     private:
     SDL_Window* window;
@@ -13,4 +16,6 @@ class GraphicsLib {
     ~GraphicsLib();
     void printscreen(uint8_t*,bool);
     void setRes(bool);
+    void create_frame();
+    void create_menu_ui();
 };

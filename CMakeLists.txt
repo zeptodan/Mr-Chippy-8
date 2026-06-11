@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.28)
+project(Mr-Chippy-8)
+find_package(SDL2 REQUIRED)
+add_executable(${PROJECT_NAME} main.cpp graphics.cpp chip8.cpp)
+target_link_libraries(${PROJECT_NAME} imgui SDL2::SDL2)
+add_subdirectory(third-party/imgui)

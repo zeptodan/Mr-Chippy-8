@@ -72,8 +72,12 @@ int main(int argc, char* argv[]){
     while(true){
         start = SDL_GetTicks64();
         if (SDL_PollEvent(&ev) != 0){
+            ImGui_ImplSDL2_ProcessEvent(&ev);
             process_event(chip.ret_keys(),ev);
         }
+        graphicslib.create_frame();
+        graphicslib.create_menu_ui();
+
         for (int i = 0; i < instructions_per_frame; i++){
             chip.decode_execute();
         }

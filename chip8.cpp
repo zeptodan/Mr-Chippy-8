@@ -437,13 +437,13 @@ RENDER_STATE Chip8::decode_execute(){
                     for (int i = 0; i <= X; i++){
                         ram[index + i] = regs[i]; 
                     }
-                    //index += X + 1;
+                    index += X + 1;
                     break;
                 case 0x0065:
                     for (int i = 0; i <= X; i++){
                         regs[i] = ram[index + i]; 
                     }
-                    //index += X + 1;
+                    index += X + 1;
                     break;
                 case 0x0075:
                     for (int i = 0; i <= X; i++){

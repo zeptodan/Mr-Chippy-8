@@ -14,3 +14,4 @@
 #define BIG_FONT_START 0x100
 #define SOUND_BUFFER_SIZE 128
 #define TOT_COLORS 4
+#define MENU_HEIGHT 50
