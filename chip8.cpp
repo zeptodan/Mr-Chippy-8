@@ -9,6 +9,14 @@ Chip8::Chip8 () {
 }
 void Chip8::load_rom(std::string file_path){
     std::ifstream file(file_path, std::ios::binary);
+    disp.fill(0);
+    regs.fill(0);
+    rpl.fill(0);
+    has_res_changed = true;
+    d_time = 0;
+    s_time = 0;
+    stack = std::stack<uint16_t>();
+    quirks.high_res = false;
     file.read(reinterpret_cast<char*>(ram.data() + ROM_START),ram.size() - ROM_START);
     pc = ROM_START;
     return;

@@ -4,7 +4,7 @@ GraphicsLib::GraphicsLib(){
     window = SDL_CreateWindow("Mr Chippy 8",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,CHIP_8_X * SCALE,CHIP_8_Y * SCALE + MENU_HEIGHT,SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
     texture = SDL_CreateTexture(renderer,SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_STREAMING,CHIP_8_X / 2,CHIP_8_Y / 2);
-
+    
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
@@ -13,6 +13,14 @@ GraphicsLib::GraphicsLib(){
     ImGui::GetStyle().ScaleAllSizes(2.0f);
     ImGuiIO& io = ImGui::GetIO();
     io.FontGlobalScale = 2.0f;
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+    io.MouseDrawCursor = false;
+
+    NFD::Init();
+    SDL_ShowCursor(SDL_ENABLE);
+    SDL_SetRelativeMouseMode(SDL_FALSE);
+    SDL_SetWindowGrab(window, SDL_FALSE);
+    SDL_RaiseWindow(window); 
 }
 GraphicsLib::~GraphicsLib(){
     SDL_DestroyTexture(texture);
@@ -22,6 +30,8 @@ GraphicsLib::~GraphicsLib(){
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
+
+    NFD::Quit();
 }
 void GraphicsLib::printscreen(uint8_t* disp,bool high_res){
     int row_len = high_res ? CHIP_8_X : CHIP_8_X / 2;
@@ -56,11 +66,14 @@ void GraphicsLib::create_frame(){
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 }
-void GraphicsLib::create_menu_ui(){
+menu_action_enum GraphicsLib::create_menu_ui(NFD::UniquePath& path){
+    menu_action_enum action = menu_action_enum::none;
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Open ROM")) {
-                //open_rom();
+                if (open_rom(path) == NFD_OKAY){
+                    action = menu_action_enum::load_rom;
+                }
             }
             if (ImGui::MenuItem("Reset")) {
                 //reset_emulator();
@@ -72,4 +85,9 @@ void GraphicsLib::create_menu_ui(){
         }
         ImGui::EndMainMenuBar();
     }
+    return action;
+}
+nfdresult_t GraphicsLib::open_rom(NFD::UniquePath& path){
+    nfdfilteritem_t filters[] = { {"ROMs", "ch8,xo8"} };
+    return NFD::OpenDialog(path, filters, 1);
 }

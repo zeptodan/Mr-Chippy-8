@@ -49,13 +49,9 @@ void play_sound(SDL_AudioDeviceID device,std::array<int16_t,SAMPLES>& buffer,std
     SDL_QueueAudio(device,buffer.data(),buffer.size() * sizeof(int16_t));
 }
 int main(int argc, char* argv[]){
-    if (argc != 2){
-        std::cout << "give rom path\n";
-        return 1;
-    }
     Chip8 chip;
     GraphicsLib graphicslib;
-    chip.load_rom(argv[1]);
+    bool is_rom_loaded = false;
     SDL_Event ev;
     bool ring = false;
     uint64_t start, end, ms_per_frame = 1000 / FPS;
@@ -69,18 +65,25 @@ int main(int argc, char* argv[]){
     SDL_PauseAudioDevice(device,0);
     std::array<int16_t,SAMPLES> buffer;
     int instructions_per_frame = INSTRUCTION_RATE / FPS;
+    NFD::UniquePath path;
+    menu_action_enum action;
     while(true){
         start = SDL_GetTicks64();
         while (SDL_PollEvent(&ev) != 0){
             ImGui_ImplSDL2_ProcessEvent(&ev);
             process_event(chip.ret_keys(),ev);
         }
-        for (int i = 0; i < instructions_per_frame; i++){
-            chip.decode_execute();
+        if (is_rom_loaded){
+            for (int i = 0; i < instructions_per_frame; i++){
+                chip.decode_execute();
+            }
         }
         graphicslib.create_frame();
-        graphicslib.create_menu_ui();
-
+        action = graphicslib.create_menu_ui(path);
+        if (action == menu_action_enum::load_rom){
+            is_rom_loaded = true;
+            chip.load_rom(path.get());
+        }
         if (chip.has_resChanged()){
             chip.set_has_resChanged(false);
             graphicslib.setRes(chip.getQuirks().high_res);
