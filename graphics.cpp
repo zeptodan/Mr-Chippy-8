@@ -75,12 +75,6 @@ menu_action_enum GraphicsLib::create_menu_ui(NFD::UniquePath& path){
                     action = menu_action_enum::load_rom;
                 }
             }
-            if (ImGui::MenuItem("Reset")) {
-                //reset_emulator();
-            }
-            if (ImGui::MenuItem("Quit")) {
-                //running = false;
-            }
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

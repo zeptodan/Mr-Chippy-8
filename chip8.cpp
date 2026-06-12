@@ -17,7 +17,12 @@ void Chip8::load_rom(std::string file_path){
     s_time = 0;
     stack = std::stack<uint16_t>();
     quirks.high_res = false;
+    plane = 1;
+    pitch = BEEP_FREQ;
+    std::fill(sound_buffer.begin(), sound_buffer.begin() + (SOUND_BUFFER_SIZE / 2), 1);
+    std::fill(sound_buffer.begin() + (SOUND_BUFFER_SIZE / 2), sound_buffer.end(), 0);
     file.read(reinterpret_cast<char*>(ram.data() + ROM_START),ram.size() - ROM_START);
+    index = 0;
     pc = ROM_START;
     return;
 }
@@ -84,10 +89,10 @@ void Chip8::draw_sprite(uint8_t VX, uint8_t VY, uint8_t N, uint8_t plane, uint16
 }
 RENDER_STATE Chip8::decode_execute(){
     uint16_t op = fetch();
-    uint16_t X = (op & 0x0F00) >> 8;
-    uint16_t Y = (op & 0x00F0) >> 4;
-    uint16_t N = op & 0x000F;
-    uint16_t NN = op & 0x00FF;
+    uint8_t X = (op & 0x0F00) >> 8;
+    uint8_t Y = (op & 0x00F0) >> 4;
+    uint8_t N = op & 0x000F;
+    uint8_t NN = op & 0x00FF;
     uint16_t NNN = op & 0x0FFF;
     switch (op & 0xF000)
     {
@@ -143,10 +148,12 @@ RENDER_STATE Chip8::decode_execute(){
                 case 0x00FE:
                     quirks.high_res = false;
                     has_res_changed = true;
+                    disp.fill(0);
                     break;
                 case 0x00FF:
                     quirks.high_res = true;
                     has_res_changed = true;
+                    disp.fill(0);
                     break;
                 default:
                     if ((op & 0x0FF0) == 0x00C0){
